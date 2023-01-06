@@ -81,12 +81,20 @@ func base64decode(source string) string {
 	return string(dec)
 }
 
-func grabString(source string, regex string) [][]string {
+func grabAllString(source string, regex string) [][]string {
 	r, err := regexp.Compile(regex)
 	if err != nil {
 		return [][]string{}
 	}
 	return r.FindAllStringSubmatch(source, -1)
+}
+
+func grabString(source string, regex string) []string {
+	r, err := regexp.Compile(regex)
+	if err != nil {
+		return []string{}
+	}
+	return r.FindStringSubmatch(source)
 }
 
 func getFilePermission(filename string) string {
