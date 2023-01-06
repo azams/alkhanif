@@ -1,9 +1,12 @@
 package tools
 
 import (
+	b64 "encoding/base64"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"regexp"
 	"strings"
 )
 
@@ -38,4 +41,44 @@ func CompileRequest(data string, ssl bool) (targetUrl string, method string, bod
 	}
 	targetUrl = scheme + "://" + targetDomain + path
 	return targetUrl, method, body, req, httpversion
+}
+
+func isFileExists(filename string) bool {
+	if _, err := os.Stat(filename); err == nil {
+		return true
+	}
+	return false
+}
+
+func isDirectory(path string) (bool, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+	return fileInfo.IsDir(), err
+}
+
+func getFileExtension(filename string) string {
+	splitted := strings.Split(filename, ".")
+	return splitted[len(splitted)-1]
+}
+
+func base64encode(source string) string {
+	return b64.StdEncoding.EncodeToString([]byte(source))
+}
+
+func base64decode(source string) string {
+	dec, err := b64.StdEncoding.DecodeString(source)
+	if err != nil {
+		return ""
+	}
+	return string(dec)
+}
+
+func grabString(source string, regex string) [][]string {
+	r, err := regexp.Compile(regex)
+	if err != nil {
+		return [][]string{}
+	}
+	return r.FindAllStringSubmatch(source, -1)
 }
