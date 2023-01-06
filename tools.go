@@ -1,12 +1,18 @@
 package tools
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	b64 "encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -81,4 +87,34 @@ func grabString(source string, regex string) [][]string {
 		return [][]string{}
 	}
 	return r.FindAllStringSubmatch(source, -1)
+}
+
+func getFilePermission(filename string) string {
+	fileInfo, err := os.Stat(filename)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", fileInfo.Mode())
+}
+
+func getFileSize(filename string) string {
+	fileinfo, err := os.Stat(filename)
+	if err != nil {
+		return ""
+	}
+	return strconv.FormatInt(fileinfo.Size(), 10)
+}
+
+func hasher(origin string, mode string) string {
+	if mode == "md5" {
+		return fmt.Sprintf("%v", md5.Sum([]byte(origin)))
+	} else if mode == "sha1" {
+		return fmt.Sprintf("%v", sha1.Sum([]byte(origin)))
+	} else if mode == "sha256" {
+		return fmt.Sprintf("%v", sha256.Sum256([]byte(origin)))
+	} else if mode == "sha512" {
+		return fmt.Sprintf("%v", sha512.Sum512([]byte(origin)))
+	} else {
+		return "Encryption does not supported"
+	}
 }
