@@ -138,3 +138,69 @@ func VisitURL(link string) (string, error) {
 	}
 	return string(result), nil
 }
+
+func ChatGPT(apiKey string, question string) (string, error) {
+	url := "https://api.openai.com/v1/completions"
+
+	requestBody := struct {
+		Model     string `json:"model"`
+		Prompt    string `json:"prompt"`
+		MaxTokens int    `json:"max_tokens"`
+		User      string `json:"user"`
+	}{
+		Model:     "text-davinci-003",
+		Prompt:    question,
+		MaxTokens: 3000,
+		User:      "alkhanif",
+	}
+
+	jsonValue, _ := json.Marshal(requestBody)
+	client := &http.Client{}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonValue))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+apiKey)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	res, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	type Choice struct {
+		Text     string  `json:"text"`
+		Index    int     `json:"index"`
+		Logprobs float64 `json:"logprobs"`
+		Reason   string  `json:"finish_reason"`
+	}
+
+	type Usage struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	}
+
+	type Response struct {
+		ID      string   `json:"id"`
+		Object  string   `json:"object"`
+		Created int      `json:"created"`
+		Model   string   `json:"model"`
+		Choices []Choice `json:"choices"`
+		Usage   Usage    `json:"usage"`
+	}
+
+	var response Response
+	err = json.Unmarshal(res, &response)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(response.Choices[0].Text), err
+}
