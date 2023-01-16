@@ -1,11 +1,13 @@
 package alkhanif
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
 	b64 "encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
