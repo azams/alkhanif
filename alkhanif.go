@@ -204,5 +204,6 @@ func ChatGPT(apiKey string, question string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(response.Choices)
 	return strings.TrimSpace(response.Choices[0].Text), err
 }
